@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+  <title>Üzüm 🐾 Merve'nin Kedisi</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{--bg:#0d0820;--card:rgba(255,255,255,.07);--accent:#c084fc;--accent2:#f472b6;--text:#f1e9ff;--muted:#a78bca}
+    html{height:100%}
+    body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);
+      height:100dvh;display:flex;flex-direction:column;align-items:center;overflow:hidden;
+      padding-top:env(safe-area-inset-top);
+      padding-bottom:env(safe-area-inset-bottom)}
+
+    header{width:100%;max-width:480px;padding:10px 16px 4px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    header h1{font-size:1.25rem;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--accent2));
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .age-badge{background:var(--card);border:1px solid rgba(192,132,252,.3);border-radius:20px;
+      padding:3px 9px;font-size:.65rem;color:var(--muted)}
+
+    .scene{width:100%;max-width:480px;flex:1;min-height:180px;max-height:300px;
+      position:relative;overflow:hidden;border-radius:20px}
+    .sky{position:absolute;inset:0;transition:background 2s ease}
+    .ground{position:absolute;bottom:0;left:0;right:0;height:55px;transition:background 2s ease}
+    .stars-layer{position:absolute;inset:0;transition:opacity 2s}
+    .star{position:absolute;background:white;border-radius:50%;animation:twinkle var(--d,3s) infinite alternate}
+    @keyframes twinkle{0%{opacity:.1}100%{opacity:.85}}
+    .sky-body{position:absolute;font-size:2rem;transition:all 2s ease}
+    .cloud{position:absolute;font-size:1.6rem;opacity:.7;animation:cloud-drift linear infinite}
+    @keyframes cloud-drift{from{transform:translateX(-80px)}to{transform:translateX(520px)}}
+
+    .cat-world{position:absolute;bottom:38px;display:flex;flex-direction:column;align-items:center;
+      transition:opacity .3s;left:50%;transform:translateX(-50%)}
+    .mc-tag{background:rgba(0,0,0,.55);color:rgba(255,255,255,.92);font-size:.7rem;font-weight:800;
+      letter-spacing:.07em;padding:3px 10px;border-radius:3px;margin-bottom:3px;pointer-events:none;
+      text-shadow:1px 1px 0 rgba(0,0,0,.8),-1px -1px 0 rgba(0,0,0,.8);border:1px solid rgba(255,255,255,.1)}
+    @keyframes bubble-in{from{opacity:0;transform:scale(.7) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+    .cat-img{width:112px;height:112px;object-fit:contain;cursor:pointer;
+      -webkit-tap-highlight-color:transparent;user-select:none;
+      filter:drop-shadow(0 4px 18px rgba(192,132,252,.5));transition:transform .12s}
+    .cat-img:active{transform:scale(.93)}
+    .cat-shadow{width:78px;height:13px;background:rgba(0,0,0,.4);border-radius:50%;filter:blur(4px);margin-top:1px}
+
+    /* Sad cat - sits directly in scene, not in cat-world */
+    #sad-img{position:absolute;bottom:55px;left:50%;transform:translateX(-50%);
+      width:112px;height:112px;object-fit:contain;display:none;z-index:7;
+      filter:drop-shadow(0 4px 18px rgba(100,50,50,.6));
+      animation:idle-bob 3s ease-in-out infinite;pointer-events:none}
+
+    /* Scene overlays */
+    .scene-overlay{position:absolute;inset:0;opacity:0;pointer-events:none;
+      transition:opacity .4s;border-radius:20px;z-index:8;
+      display:flex;flex-direction:column;align-items:center;justify-content:center}
+    .scene-overlay.active{opacity:1;pointer-events:all}
+    .bath-overlay{background:rgba(10,20,40,.88)}
+    .sleep-overlay-bg{background:linear-gradient(180deg,#020008 0%,#080418 100%)}
+    .sleep-moon{position:absolute;top:18px;right:26px;font-size:2rem;
+      animation:moon-glow 3s ease-in-out infinite}
+    @keyframes moon-glow{0%,100%{filter:brightness(1)}50%{filter:brightness(1.5)}}
+
+    /* Bowls */
+    .bowl{position:absolute;bottom:55px;display:flex;flex-direction:column;align-items:center;
+      opacity:0;pointer-events:none;transition:opacity .3s}
+    .bowl.visible{opacity:1}
+    .bowl-icon{font-size:2.2rem;filter:drop-shadow(0 2px 5px rgba(0,0,0,.5))}
+    .bowl-lbl{font-size:.52rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+    #food-bowl{left:14%}.food-lbl{color:#f472b6}
+    #water-bowl{right:14%}.water-lbl{color:#60a5fa}
+
+    /* Yarn */
+    .yarn{position:absolute;bottom:62px;display:flex;flex-direction:column;align-items:center;
+      opacity:0;pointer-events:none;z-index:6;transition:opacity .3s}
+    .yarn.visible{opacity:1;pointer-events:all}
+    #yarn-canvas{width:52px;height:52px;filter:drop-shadow(0 3px 10px rgba(220,60,60,.7));
+      animation:yarn-idle 2s ease-in-out infinite alternate}
+    @keyframes yarn-idle{from{transform:rotate(-6deg)}to{transform:rotate(6deg)}}
+    .yarn-hp{display:flex;gap:2px;margin-top:3px;justify-content:center}
+    .yarn-heart{font-size:.75rem}
+
+    /* Cat animations */
+    .cat-img.idle{animation:idle-bob 3s ease-in-out infinite}
+    @keyframes idle-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+    .cat-img.walk-r{animation:walk-r .28s steps(1) infinite}
+    @keyframes walk-r{0%{transform:translateY(0) scaleX(1)}50%{transform:translateY(-5px) scaleX(1)}}
+    .cat-img.walk-l{animation:walk-l .28s steps(1) infinite}
+    @keyframes walk-l{0%{transform:translateY(0) scaleX(-1)}50%{transform:translateY(-5px) scaleX(-1)}}
+    .cat-img.eating{animation:eat .22s ease-in-out infinite alternate}
+    @keyframes eat{0%{transform:translateY(0) rotate(-8deg)}100%{transform:translateY(-4px) rotate(8deg)}}
+    .cat-img.drinking{animation:drink .32s ease-in-out infinite alternate}
+    @keyframes drink{0%{transform:translateY(0)}100%{transform:translateY(-5px) scaleX(.95)}}
+    .cat-img.happy{animation:happy .38s ease-in-out 5}
+    @keyframes happy{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-16px) scale(1.08)}}
+    .cat-img.play{animation:play-paw .25s ease-in-out infinite alternate}
+    @keyframes play-paw{0%{transform:rotate(-15deg) translateX(-4px)}100%{transform:rotate(15deg) translateX(4px)}}
+    .cat-img.attack{animation:attack-pounce .15s ease-in-out 4 alternate}
+    @keyframes attack-pounce{0%{transform:translateX(-12px) scale(1.08)}100%{transform:translateX(12px) scale(.94)}}
+
+    .stats{width:100%;max-width:480px;padding:0 12px;display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px;flex-shrink:0}
+    .stat-item{background:var(--card);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:7px 10px;
+      display:flex;flex-direction:column;gap:3px}
+    .stat-label{display:flex;align-items:center;gap:4px;font-size:.64rem;font-weight:700;
+      text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+    .stat-bar-bg{height:6px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden}
+    .stat-bar{height:100%;border-radius:4px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+    .bar-food{background:linear-gradient(90deg,#f472b6,#fb7185)}
+    .bar-water{background:linear-gradient(90deg,#60a5fa,#93c5fd)}
+    .bar-happy{background:linear-gradient(90deg,#fbbf24,#fcd34d)}
+    .bar-sleep{background:linear-gradient(90deg,#818cf8,#a5b4fc)}
+    .bar-clean{background:linear-gradient(90deg,#34d399,#6ee7b7)}
+    .bar-age{background:linear-gradient(90deg,var(--accent),var(--accent2))}
+    .stat-val{font-size:.58rem;color:var(--muted);text-align:right}
+    .stat-item.warn .stat-bar-bg{animation:warn-pulse 1s infinite}
+    @keyframes warn-pulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 8px rgba(251,191,36,.7)}}
+
+    .actions{width:100%;max-width:480px;padding:0 12px 10px;display:grid;grid-template-columns:repeat(5,1fr);gap:6px;flex-shrink:0}
+    .btn{background:var(--card);border:1.5px solid rgba(255,255,255,.1);border-radius:14px;
+      padding:10px 3px;display:flex;flex-direction:column;align-items:center;gap:3px;
+      cursor:pointer;transition:all .12s;color:var(--text);font-family:'Nunito',sans-serif;
+      font-weight:700;font-size:.6rem;-webkit-tap-highlight-color:transparent;user-select:none;
+      min-height:52px;touch-action:manipulation}
+    .btn:active{transform:scale(.91);background:rgba(255,255,255,.13)}
+    .btn .ic{font-size:1.35rem;line-height:1}
+    .btn.f{border-color:rgba(244,114,182,.4)}.btn.w{border-color:rgba(96,165,250,.4)}
+    .btn.c{border-color:rgba(52,211,153,.4)}.btn.s{border-color:rgba(129,140,248,.4)}
+    .btn.y{border-color:rgba(251,191,36,.4)}
+    .btn:disabled{opacity:.38;cursor:not-allowed;transform:none!important}
+
+    .status-bar{width:100%;max-width:480px;padding:2px 13px 4px;text-align:center;
+      font-size:.73rem;font-weight:700;color:var(--accent);min-height:16px;flex-shrink:0}
+    .time-badge{font-size:.63rem;color:var(--muted);font-weight:700;
+      background:var(--card);border-radius:12px;padding:3px 9px;border:1px solid rgba(255,255,255,.07)}
+
+    .speech{position:absolute;top:-50px;right:-12px;background:white;color:#222;
+      border-radius:14px 14px 14px 4px;padding:7px 13px;font-size:.72rem;font-weight:700;
+      max-width:200px;text-align:center;box-shadow:0 4px 16px rgba(0,0,0,.3);line-height:1.35;
+      z-index:20;display:none;animation:bubble-in .3s cubic-bezier(.34,1.56,.64,1) forwards}
+    .speech::after{content:'';position:absolute;bottom:-7px;left:12px;border:7px solid transparent;
+      border-top-color:white;border-bottom:0}
+
+    .particle{position:fixed;pointer-events:none;font-size:1.25rem;
+      animation:p-rise 1.1s ease-out forwards;z-index:200}
+    @keyframes p-rise{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-110px) scale(.4)}}
+
+    #loading{position:fixed;inset:0;background:var(--bg);
+      display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;gap:12px}
+    #loading p{color:var(--muted);font-size:.88rem}
+    .spinner{width:36px;height:36px;border:3px solid rgba(192,132,252,.2);
+      border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* Küçük ekranlar (iPhone SE vb. ≤375px yükseklik ≤680px) */
+    @media (max-height:680px){
+      header{padding:6px 14px 2px}
+      .scene{min-height:160px;max-height:220px}
+      .stats{gap:4px;margin-bottom:4px}
+      .stat-item{padding:5px 8px;gap:2px}
+      .stat-bar-bg{height:5px}
+      .actions{padding-bottom:6px;gap:4px}
+      .btn{padding:8px 2px;min-height:46px}
+      .status-bar{padding:2px 13px 2px;font-size:.68rem}
+    }
+
+    /* Yatay mod */
+    @media (orientation:landscape) and (max-height:500px){
+      .scene{max-height:160px;min-height:120px}
+      .stats{grid-template-columns:repeat(3,1fr)}
+      .stat-item{padding:4px 8px}
+    }
+  </style>
+</head>
+<body>
+<div id="loading"><div class="spinner"></div><p>Üzüm uyanıyor... 🐾</p></div>
+
+<header>
+  <h1>🐾 Üzüm</h1>
+  <div style="display:flex;gap:8px;align-items:center">
+    <div class="time-badge" id="time-badge">⏰ --:--</div>
+    <div class="age-badge" id="age-badge">Yavru Kedi</div>
+  </div>
+</header>
+
+<div class="scene" id="scene">
+  <div class="sky" id="sky"></div>
+  <div class="stars-layer" id="stars-layer"></div>
+  <div class="sky-body" id="sky-body"></div>
+  <div class="ground" id="ground"></div>
+  <div class="cloud" style="top:25px;animation-duration:28s;animation-delay:-5s">☁️</div>
+  <div class="cloud" style="top:45px;font-size:1.1rem;animation-duration:38s;animation-delay:-15s">☁️</div>
+
+  <!-- Bath overlay -->
+  <div class="scene-overlay bath-overlay" id="bath-scene">
+    <img src="3.png" style="width:200px;height:200px;object-fit:contain;animation:idle-bob 1s ease-in-out infinite alternate" alt="banyo"/>
+  </div>
+  <!-- Sleep overlay -->
+  <div class="scene-overlay sleep-overlay-bg" id="sleep-scene">
+    <div class="sleep-moon">🌙</div>
+    <img src="4.png" style="width:210px;height:210px;object-fit:contain;animation:idle-bob 2.8s ease-in-out infinite" alt="uyku"/>
+  </div>
+
+  <!-- Bowls -->
+  <div class="bowl" id="food-bowl"><div class="bowl-icon">🍖</div><div class="bowl-lbl food-lbl">Mama</div></div>
+  <div class="bowl" id="water-bowl"><div class="bowl-icon">💧</div><div class="bowl-lbl water-lbl">Su</div></div>
+
+  <!-- Yarn -->
+  <div class="yarn" id="yarn">
+    <canvas id="yarn-canvas" width="52" height="52"></canvas>
+    <div class="yarn-hp" id="yarn-hp"></div>
+  </div>
+
+  <!-- Sad cat (direct in scene, not in cat-world) -->
+  <img id="sad-img" src="1.png" alt="Üzüm üzgün"/>
+
+  <!-- Cat world -->
+  <div class="cat-world" id="cat-world">
+    <div class="speech" id="speech"></div>
+    <div class="mc-tag">Üzüm</div>
+    <img class="cat-img idle" id="cat-img" src="2.png" alt="Üzüm"/>
+    <div class="cat-shadow"></div>
+  </div>
+</div>
+
+<div class="status-bar" id="status-text">Merve'nin kedisi seni seviyor! 💜</div>
+
+<div class="stats">
+  <div class="stat-item" id="si-food"><div class="stat-label">🍖 Açlık</div>
+    <div class="stat-bar-bg"><div class="stat-bar bar-food" id="bar-food" style="width:80%"></div></div>
+    <div class="stat-val" id="val-food">80%</div></div>
+  <div class="stat-item" id="si-water"><div class="stat-label">💧 Su</div>
+    <div class="stat-bar-bg"><div class="stat-bar bar-water" id="bar-water" style="width:80%"></div></div>
+    <div class="stat-val" id="val-water">80%</div></div>
+  <div class="stat-item" id="si-happy"><div class="stat-label">😊 Mutluluk</div>
+    <div class="stat-bar-bg"><div class="stat-bar bar-happy" id="bar-happy" style="width:80%"></div></div>
+    <div class="stat-val" id="val-happy">80%</div></div>
+  <div class="stat-item" id="si-clean"><div class="stat-label">✨ Temizlik</div>
+    <div class="stat-bar-bg"><div class="stat-bar bar-clean" id="bar-clean" style="width:80%"></div></div>
+    <div class="stat-val" id="val-clean">80%</div></div>
+  <div class="stat-item" id="si-sleep"><div class="stat-label">🌙 Enerji</div>
+    <div class="stat-bar-bg"><div class="stat-bar bar-sleep" id="bar-sleep" style="width:80%"></div></div>
+    <div class="stat-val" id="val-sleep">80%</div></div>
+  <div class="stat-item"><div class="stat-label">🎂 Yaş</div>
+    <div class="stat-bar-bg"><div class="stat-bar bar-age" id="bar-age" style="width:5%"></div></div>
+    <div class="stat-val" id="val-age">Yeni doğdu</div></div>
+</div>
+
+<div class="actions">
+  <button class="btn f" id="btn-feed" onclick="doAction('feed',event)"><span class="ic">🍖</span><span>Besle</span></button>
+  <button class="btn w" id="btn-water" onclick="doAction('water',event)"><span class="ic">💧</span><span>Su Ver</span></button>
+  <button class="btn c" id="btn-wash" onclick="doAction('wash',event)"><span class="ic">🛁</span><span>Yıka</span></button>
+  <button class="btn s" id="btn-sleep" onclick="doAction('sleep',event)"><span class="ic">🌙</span><span>Uyut</span></button>
+  <button class="btn y" id="btn-yarn" onclick="doAction('yarn',event)"><span class="ic">🧶</span><span>Top At</span></button>
+</div>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import{getDatabase,ref,set,onValue}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const app=initializeApp({
+  apiKey:"AIzaSyAvATObOV-M4iLkZn5iwtBBb4_9oF136M4",
+  authDomain:"kedy-332ce.firebaseapp.com",
+  databaseURL:"https://kedy-332ce-default-rtdb.firebaseio.com",
+  projectId:"kedy-332ce",storageBucket:"kedy-332ce.firebasestorage.app",
+  messagingSenderId:"328711825552",appId:"1:328711825552:web:9ca3febbd89b197f645015"
+});
+const db=getDatabase(app);
+const catRef=ref(db,'kedy');
+
+const normalCompliments=[
+  "Merve çok güzelsin! 💜",
+  "Seni seviyorum Merve! 🥰",
+  "En iyi sahibim sensin! ✨",
+  "Merve gülünce her şey güzelleşiyor! 🌸",
+  "Sana sarılmak istiyorum! 🤗",
+  "Merve çok tatlısın! 🍬",
+  "Seninle olmak harika! 💫",
+  "Sen olmasan ne yapardım! 💝",
+  "Pençelerim sana sarılmak istiyor! 🐾",
+  "Mırr mırr mırr 😻",
+  "Gözlerin çok güzel Merve! 💚",
+  "Merve bugün de çok tatlı! ☁️",
+  "Saçların çok güzel! 🌊",
+  "Sesin duyunca mutlu oluyorum! 🎵",
+  "Merve'nin gülüşü en güzel şey! 😸",
+  "Seni çok seviyorum, biliyor musun? 💕",
+  "En güzel insan sensin Merve! 🌷",
+  "Yanında olmak çok iyi hissettiriyor! ☀️",
+  "Merve her gün daha güzel oluyor! 🌟",
+  "Seni görmek beni mutlu ediyor! 😊",
+  "Merve'nin kalbi de tıpkı kendisi gibi güzel! 💖",
+  "Bugün çok enerjiksin Merve! ⚡",
+  "Merve gülümseyince dünya daha iyi bir yer oluyor! 🌍",
+  "Sana baktıkça doyamıyorum! 👀💜",
+  "Çok şanslıyım böyle bir sahibim olduğu için! 🏆",
+  "Merve gibi biri dünyaya bir kez gelir! 🌠",
+  "Sesini duymak en sevdiğim şey! 🎶",
+  "Merve çok zeki ve güzel! 🧠💜",
+  "Her gün seninle olmak istiyorum! 🐾",
+  "Merve'nin gülüşü bulaşıcı — çok güzel! 😹",
+  "Seni düşününce mutlu oluyorum! 💭💕"
+];
+const fizikCompliments=[
+  "Merve güldüğünde zaman yavaşlıyor, izafiyet teorisi bunu açıklıyor! ⏳💕",
+  "Evrendeki tüm yıldızlar toplansa Merve kadar parlak edemez! 🌠",
+  "Merve'nin enerjisi termodinamiği çürütüyor — hiç azalmıyor! ✨",
+  "Fizik her şeyin sınırlı olduğunu söyler ama Merve'nin güzelliği sonsuz! ♾️",
+  "Einstein E=mc² dedi ama Merve=güzellik² 💜",
+  "Merve'nin gülüşü ışık hızından hızlı yayılıyor! ⚡",
+  "Kuantum mekaniğine göre Merve aynı anda hem tatlı hem de süper tatlı! 😻",
+  "Merve'nin çekim kuvveti yerçekiminden güçlü — kalpleri çekiyor! 🌍💕",
+  "Dopamin, oksitosin, serotonin — Merve'yi görünce hepsi aynı anda fırlıyor! 🧠💜",
+  "Evren genişliyor ama Merve'ye olan sevgim sabit — en güçlü kuvvet bu! 🌌"
+];
+let lastWasPhysics=false;
+function getCompliment(){
+  if(!lastWasPhysics&&Math.random()<0.25){
+    lastWasPhysics=true;
+    return fizikCompliments[Math.floor(Math.random()*fizikCompliments.length)];
+  }
+  lastWasPhysics=false;
+  return normalCompliments[Math.floor(Math.random()*normalCompliments.length)];
+}
+const compliments=normalCompliments;
+
+const DEFAULT={food:80,water:80,happy:80,sleep:80,clean:80,age:0,birthTime:Date.now(),lastUpdate:Date.now(),sleeping:false};
+let state={...DEFAULT};
+let busy=false,bubTimer=null,loaded=false,walkTimer=null,speechTimer=null,statLoopId=null,skyLoopId=null,complimentLoopId=null;
+
+// Yarn - local only
+let yarn={active:false,hp:3,maxHp:3,x:0};
+
+// DOM
+const catWorld=document.getElementById('cat-world');
+const catImg=document.getElementById('cat-img');
+const sadImg=document.getElementById('sad-img');
+const sceneEl=document.getElementById('scene');
+const yarnEl=document.getElementById('yarn');
+
+// ── LocalStorage helpers ──
+function saveLocal(data){
+  try{localStorage.setItem('uzum_state',JSON.stringify(data));}catch(e){}
+}
+function loadLocal(){
+  try{const s=JSON.parse(localStorage.getItem('uzum_state')||'null');if(s&&s.lastUpdate)return s;}catch(e){}
+  return null;
+}
+
+// ── Persist ──
+let fbLoaded=false;
+function initState(d,prevLocalUpdate){
+  const local=loadLocal();
+  // Whichever source is more recent wins
+  if(d&&d.lastUpdate&&(!local||d.lastUpdate>=local.lastUpdate)){
+    state={...DEFAULT,...d};
+  }else if(local&&local.lastUpdate){
+    state={...DEFAULT,...local};
+  }
+  const prevUpdate=state.lastUpdate;
+  applyDecay();
+  saveState();
+  hideLoading(prevUpdate);
+  updateUI();
+  restoreVisualState();
+}
+
+onValue(catRef,(snap)=>{
+  if(fbLoaded)return; // only use Firebase for initial load
+  fbLoaded=true;
+  initState(snap.val());
+},(err)=>{
+  console.warn('Firebase error:',err);
+  if(!fbLoaded){fbLoaded=true;initState(null);}
+});
+setTimeout(()=>{if(!loaded){fbLoaded=true;initState(null);}},4000);
+
+// Refresh decay when page becomes visible again (e.g. switching tabs)
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden&&loaded){applyDecay();saveState();updateUI();}
+});
+
+function hideLoading(prevUpdate){
+  if(loaded)return;
+  loaded=true;
+  document.getElementById('loading').style.display='none';
+  startAllLoops();
+  updateSky();
+  // "Özledim" mesajı: 2+ dakika geçmişse
+  if(prevUpdate&&Date.now()-prevUpdate>2*60*1000){
+    setTimeout(()=>showBubble('Seni çok özledim! Geri döndüğüne sevindim! 💕🐾'),1500);
+  }
+}
+
+// ── Save ──
+function saveState(){
+  state.lastUpdate=Date.now();
+  const data={
+    food:+state.food.toFixed(2),water:+state.water.toFixed(2),
+    happy:+state.happy.toFixed(2),sleep:+state.sleep.toFixed(2),
+    clean:+state.clean.toFixed(2),age:state.age||0,
+    birthTime:state.birthTime||Date.now(),
+    lastUpdate:state.lastUpdate,sleeping:!!state.sleeping
+  };
+  saveLocal(data);
+  set(catRef,data).catch(()=>{});
+}
+
+// ── Decay ──
+function applyDecay(){
+  const now=Date.now();
+  const mins=(now-(state.lastUpdate||now))/60000;
+  if(mins<0.1)return;
+  if(state.sleeping){
+    state.sleep=Math.min(100,state.sleep+mins*1.8);
+    state.food=Math.max(0,state.food-mins*0.12);
+    state.water=Math.max(0,state.water-mins*0.10);
+    state.happy=Math.max(0,state.happy-mins*0.08);
+    state.clean=Math.max(0,state.clean-mins*0.06);
+  }else{
+    state.food=Math.max(0,state.food-mins*2.8);
+    state.water=Math.max(0,state.water-mins*3.2);
+    state.happy=Math.max(0,state.happy-mins*1.2);
+    state.sleep=Math.max(0,state.sleep-mins*0.30);
+    state.clean=Math.max(0,state.clean-mins*1.8);
+  }
+  const birth=new Date(state.birthTime||Date.now());
+  state.age=Math.max(0,Math.floor((getIstTime()-birth)/86400000));
+  state.lastUpdate=now;
+}
+
+function checkAutoWake(){
+  if(state.sleeping&&state.sleep>=100){
+    state.sleeping=false;
+    saveState();
+    document.getElementById('sleep-scene').classList.remove('active');
+    catWorld.style.opacity='1';
+    showBubble("Günaydın Merve! Dinçtim! 🌞");
+    setAnim('idle');startWalk();updateUI();
+  }
+}
+
+function restoreVisualState(){
+  if(state.sleeping){
+    catWorld.style.opacity='0';
+    document.getElementById('sleep-scene').classList.add('active');
+  }else{
+    catWorld.style.opacity='1';
+    document.getElementById('sleep-scene').classList.remove('active');
+    setAnim('idle');
+  }
+}
+
+// ── Loops ──
+function startAllLoops(){
+  if(!statLoopId){
+    statLoopId=setInterval(()=>{applyDecay();saveState();updateUI();checkAutoWake();},15000);
+  }
+  scheduleSpeech();
+  if(!skyLoopId) skyLoopId=setInterval(updateSky,30000);
+  if(!complimentLoopId) complimentLoopId=setInterval(()=>{
+    const c=getCompliment();
+    showBubble(c);
+  },60000);
+  if(!state.sleeping) startWalk();
+}
+
+function scheduleSpeech(){
+  clearTimeout(speechTimer);
+  speechTimer=setTimeout(()=>{triggerSpeech();scheduleSpeech();},20000+Math.random()*40000);
+}
+
+function triggerSpeech(){
+  if(state.food<=20){showBubble("MERVE! Çok açım lütfen! 😿🍖");return;}
+  if(state.water<=20){showBubble("MERVE! Su yok ölüyorum! 😿💧");return;}
+  if(state.clean<=20){showBubble("Çok kirli oldum Merve! 😿🛁");return;}
+  if(state.food<30){showBubble("Merve! Açım! 🍖");return;}
+  if(state.water<30){showBubble("Su istiyorum! 💧");return;}
+  if(state.clean<30){showBubble("Banyo lazım! 🛁");return;}
+  if(state.sleep<20&&!state.sleeping){showBubble("Çok yoruldum... 😴");return;}
+  showBubble(getCompliment());
+}
+
+// ── Istanbul sky ──
+function getIstTime(){return new Date(new Date().toLocaleString('en-US',{timeZone:'Europe/Istanbul'}));}
+
+function updateSky(){
+  const t=getIstTime(),h=t.getHours(),m=t.getMinutes(),mins=h*60+m;
+  const sky=document.getElementById('sky'),ground=document.getElementById('ground');
+  const starsL=document.getElementById('stars-layer'),skyBody=document.getElementById('sky-body');
+  const clouds=document.querySelectorAll('.cloud'),tb=document.getElementById('time-badge');
+  tb.textContent='⏰ '+String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+  let sc,gc,so,be,bt,bl,co;
+  if(mins>=360&&mins<480){const p=(mins-360)/120;
+    sc=`linear-gradient(180deg,#1a0a3e ${(1-p)*60}%,#ff7043 ${(1-p)*20+20}%,#ffcc80 100%)`;
+    gc='linear-gradient(180deg,#2a4a1a,#1a3a0a)';so=Math.max(0,1-p*2.2);be='🌅';bt='30%';bl='8%';co=.3+p*.4;
+  }else if(mins>=480&&mins<720){
+    sc='linear-gradient(180deg,#1565c0,#42a5f5 60%,#90caf9 100%)';
+    gc='linear-gradient(180deg,#2d5a1b,#1a3a0a)';so=0;be='☀️';
+    const p=(mins-480)/240;bt=(30-p*18)+'%';bl=(8+p*32)+'%';co=.7;
+  }else if(mins>=720&&mins<960){
+    sc='linear-gradient(180deg,#0d47a1,#1976d2 50%,#64b5f6 100%)';
+    gc='linear-gradient(180deg,#2d5a1b,#1a3a0a)';so=0;be='☀️';
+    const p=(mins-720)/240;bt=(12+p*12)+'%';bl=(40+p*32)+'%';co=.5;
+  }else if(mins>=960&&mins<1080){
+    const p=(mins-960)/120;
+    sc=`linear-gradient(180deg,#1a0a3e ${p*25}%,#b71c1c ${p*50}%,#f57f17 100%)`;
+    gc='linear-gradient(180deg,#1a3a0a,#0d2205)';so=p*.5;be='🌇';bt=(24+p*28)+'%';bl=(72+p*10)+'%';co=.35;
+  }else{
+    sc='linear-gradient(180deg,#020008,#04001a 50%,#06001a 100%)';
+    gc='linear-gradient(180deg,#0a1a05,#050e02)';so=.92;
+    const np=mins>=1080?(mins-1080)/360:mins/360;be='🌕';bt='12%';bl=(8+np*42)+'%';co=.1;
+  }
+  sky.style.background=sc;ground.style.background=gc;starsL.style.opacity=so;
+  skyBody.textContent=be;skyBody.style.top=bt;skyBody.style.left=bl;
+  clouds.forEach(c=>{c.style.opacity=co;});
+}
+
+// ── Actions ──
+window.doAction=async function(action,evt){
+  if(action!=='yarn'&&(busy||yarn.active))return;
+  if(state.sleeping&&action!=='sleep'){showBubble("Uyuyorum! 😴");return;}
+
+  if(action==='yarn'){doYarn();return;}
+
+  busy=true;stopWalk();
+
+  if(action==='feed'){
+    document.getElementById('food-bowl').classList.add('visible');
+    catWorld.style.transform='none';
+    setAnim('walk-l');await moveTo(sw()*0.20,800);
+    setAnim('eating');showBubble("Mmm nefis! Teşekkürler Merve! 😋");
+    spawnP(['🍖','✨'],evt);
+    state.food=Math.min(100,state.food+25);state.happy=Math.min(100,state.happy+8);
+    applyDecay();saveState();updateUI();await sl(2000);
+    document.getElementById('food-bowl').classList.remove('visible');
+    await returnCenter();
+  }
+  else if(action==='water'){
+    document.getElementById('water-bowl').classList.add('visible');
+    catWorld.style.transform='none';
+    setAnim('walk-r');await moveTo(sw()*0.78,800);
+    setAnim('drinking');showBubble("Serin ve lezzetli! 💙");
+    spawnP(['💧','💦'],evt);
+    state.water=Math.min(100,state.water+25);state.happy=Math.min(100,state.happy+5);
+    applyDecay();saveState();updateUI();await sl(2000);
+    document.getElementById('water-bowl').classList.remove('visible');
+    await returnCenter();
+  }
+  else if(action==='wash'){
+    catWorld.style.opacity='0';await sl(250);
+    document.getElementById('bath-scene').classList.add('active');
+    showBubble("Mis gibi oldum! Merve harika! 🧼");spawnP(['🛁','✨','🫧'],evt);
+    state.clean=Math.min(100,state.clean+30);state.happy=Math.min(100,state.happy+10);
+    applyDecay();saveState();updateUI();await sl(2800);
+    document.getElementById('bath-scene').classList.remove('active');
+    catWorld.style.opacity='1';await returnCenter();
+  }
+  else if(action==='sleep'){
+    if(state.sleeping){
+      state.sleeping=false;
+      document.getElementById('sleep-scene').classList.remove('active');
+      catWorld.style.opacity='1';
+      showBubble("Günaydın Merve! 🌞");
+      applyDecay();saveState();updateUI();busy=false;await returnCenter();startWalk();return;
+    }else{
+      if(state.sleep>=100){showBubble("Hiç uyumak istemiyorum! ⚡");busy=false;return;}
+      state.sleeping=true;catWorld.style.opacity='0';await sl(280);
+      document.getElementById('sleep-scene').classList.add('active');
+      showBubble("İyi geceler Merve... 💜");
+      applyDecay();saveState();updateUI();busy=false;return;
+    }
+  }
+
+  busy=false;
+  if(!state.sleeping)startWalk();
+};
+
+// ── YARN ──
+function doYarn(){
+  if(yarn.active)return;
+  if(state.sleep<=5){showBubble("Çok yorgunum oynayamam! 😴");return;}
+
+  yarn={active:true,hp:3,maxHp:3,x:0};
+  const w=sw();
+  yarn.x=Math.random()>0.5?Math.round(w*0.74):Math.round(w*0.14);
+
+  // Position and show yarn
+  yarnEl.style.transition='none';
+  yarnEl.style.left=yarn.x+'px';
+  yarnEl.style.opacity='0';
+  yarnEl.style.transform='scale(0)';
+  yarnEl.classList.add('visible');
+  drawYarn(3,3);
+  document.getElementById('btn-yarn').disabled=true;
+
+  // Pop-in
+  setTimeout(()=>{
+    yarnEl.style.transition='transform 0.35s cubic-bezier(0.34,1.56,0.64,1),opacity 0.25s';
+    yarnEl.style.transform='scale(1)';
+    yarnEl.style.opacity='1';
+  },20);
+
+  stopWalk();
+  setTimeout(()=>playWithYarn(),450);
+}
+
+async function playWithYarn(){
+  const w=sw();
+  // Get current cat position - it's stored as px after init
+  let catX=parseFloat(catWorld.style.left);
+  if(isNaN(catX)||catX<10)catX=w/2;
+
+  // Walk cat to yarn
+  const goRight=yarn.x>catX;
+  const offset=goRight?-54:54;
+  const target=Math.max(15,Math.min(w-15,yarn.x+offset));
+  const dist=Math.abs(target-catX);
+  const dur=Math.max(400,dist/0.09);
+
+  catWorld.style.transform='none';
+  setAnim(goRight?'walk-r':'walk-l');
+  busy=true;
+  await moveTo(target,dur);
+  setAnim('idle');
+  await sl(180);
+
+  // Hit sequence: 3 hits
+  for(let i=0;i<3;i++){
+    setAnim('play');await sl(380);
+    setAnim('attack');await sl(240);
+
+    yarn.hp--;
+    drawYarn(yarn.hp,yarn.maxHp);
+
+    // Yarn hit wobble
+    yarnEl.style.transition='transform 0.08s';
+    yarnEl.style.transform='scale(1.25) rotate(20deg)';
+    await sl(90);
+    yarnEl.style.transform='scale(0.95) rotate(-8deg)';
+    await sl(90);
+    yarnEl.style.transform='scale(1) rotate(0deg)';
+
+    state.happy=Math.min(100,state.happy+8);
+    state.sleep=Math.max(0,state.sleep-5);
+    updateUI();
+    spawnParticlesAt(['🐾','💜'],yarn.x+26,window.innerHeight*0.52);
+
+    if(yarn.hp>0){
+      showBubble(yarn.hp===2?"Oynuyorum! 🐾":"Az kaldı! 😤");
+      setAnim('idle');
+      await sl(550);
+    }
+  }
+
+  // Destroy!
+  setAnim('happy');
+  showBubble("Yün topu paramparça! 😹 Yeni top at Merve!");
+  spawnParticlesAt(['🎉','✨','💥','🐾'],yarn.x+26,window.innerHeight*0.5);
+  state.happy=Math.min(100,state.happy+12);
+  applyDecay();saveState();updateUI();
+
+  // Explode anim
+  yarnEl.style.transition='transform 0.4s ease-in,opacity 0.35s ease-in';
+  yarnEl.style.transform='scale(0) rotate(720deg)';
+  yarnEl.style.opacity='0';
+  await sl(420);
+
+  // Reset
+  yarnEl.classList.remove('visible');
+  yarnEl.style.transition='none';
+  yarnEl.style.transform='';
+  yarnEl.style.opacity='';
+  yarn.active=false;
+  busy=false;
+  document.getElementById('btn-yarn').disabled=false;
+
+  await returnCenter();
+  startWalk();
+}
+
+// ── Draw yarn canvas ──
+function drawYarn(hp,maxHp){
+  const cv=document.getElementById('yarn-canvas'),ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,52,52);
+  const cx=26,cy=26,r=22;
+  const g=ctx.createRadialGradient(cx-6,cy-6,2,cx,cy,r);
+  g.addColorStop(0,'#ff7070');g.addColorStop(.5,'#e02020');g.addColorStop(1,'#7a0000');
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+  const dmg=(maxHp-hp)/maxHp;
+  ctx.strokeStyle='rgba(255,210,210,.55)';ctx.lineWidth=1.5;
+  for(let i=0;i<7;i++){const a=i*(Math.PI/3.5)+dmg*.5;ctx.beginPath();ctx.ellipse(cx,cy,r*.72,r*.32,a,0,Math.PI*2);ctx.stroke();}
+  if(dmg>0){ctx.strokeStyle='rgba(0,0,0,.55)';ctx.lineWidth=1.2;
+    for(let i=0;i<Math.floor(dmg*6);i++){const a=i*(Math.PI*2/6)+.4;
+      ctx.beginPath();ctx.moveTo(cx+Math.cos(a)*5,cy+Math.sin(a)*5);
+      ctx.lineTo(cx+Math.cos(a+.35)*(r*.85),cy+Math.sin(a+.35)*(r*.85));ctx.stroke();}}
+  ctx.beginPath();ctx.arc(cx-7,cy-7,5,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,.28)';ctx.fill();
+  const hp2=document.getElementById('yarn-hp');hp2.innerHTML='';
+  for(let i=0;i<maxHp;i++){const h=document.createElement('span');h.className='yarn-heart';h.textContent=i<hp?'❤️':'🖤';hp2.appendChild(h);}
+}
+
+// ── Pet ──
+document.getElementById('cat-world').addEventListener('click',(e)=>{
+  if(busy||yarn.active||state.sleeping)return;
+  state.happy=Math.min(100,state.happy+5);
+  setAnim('happy');spawnP(['💜','💕','⭐'],e);
+  showBubble(getCompliment());
+  saveState();updateUI();
+  setTimeout(()=>{if(!state.sleeping&&!busy)setAnim('idle');},2000);
+});
+
+// ── Walk ──
+function startWalk(){stopWalk();schedWalk();}
+function stopWalk(){clearTimeout(walkTimer);}
+function schedWalk(){
+  walkTimer=setTimeout(async()=>{
+    if(busy||state.sleeping||yarn.active){schedWalk();return;}
+    busy=true;
+    const w=sw(),cur=parseFloat(catWorld.style.left)||(w/2);
+    const goR=cur<w*.32||(cur<w*.68&&Math.random()>.5);
+    const target=goR?w*.65+Math.random()*w*.14:w*.14+Math.random()*w*.13;
+    const dist=Math.abs(target-cur),dur=Math.max(600,dist/.068);
+    setAnim(goR?'walk-r':'walk-l');
+    await moveTo(target,dur);
+    setAnim('idle');await sl(800+Math.random()*1100);
+    if(!state.sleeping&&!yarn.active){
+      setAnim(goR?'walk-l':'walk-r');await moveTo(w/2,dur*.75);setAnim('idle');
+    }
+    busy=false;schedWalk();
+  },5000+Math.random()*8000);
+}
+
+// ── Scene helpers ──
+function sw(){return sceneEl.offsetWidth||360;}
+function moveTo(px,dur){
+  return new Promise(r=>{
+    catWorld.style.transform='none';
+    catWorld.style.transition='left '+dur+'ms ease';
+    catWorld.style.left=px+'px';
+    setTimeout(r,dur);
+  });
+}
+async function returnCenter(){
+  const c=sw()/2;
+  const cur=parseFloat(catWorld.style.left)||c;
+  if(Math.abs(cur-c)>25){
+    setAnim(cur>c?'walk-l':'walk-r');
+    await moveTo(c,Math.max(350,Math.abs(cur-c)/.08));
+  }
+  catWorld.style.left=(sw()/2)+'px';
+  catWorld.style.transition='none';
+  setAnim('idle');
+}
+
+function setAnim(a){catImg.className='cat-img '+a;updateCatVisual();}
+
+// ── Sad visual ──
+function isSad(){return state.food<=20||state.water<=20||state.clean<=20;}
+function updateCatVisual(){
+  const bathOn=document.getElementById('bath-scene').classList.contains('active');
+  const sleepOn=document.getElementById('sleep-scene').classList.contains('active');
+  if(!bathOn&&!sleepOn&&isSad()){
+    catImg.style.display='none';sadImg.style.display='block';
+  }else{
+    catImg.style.display='';sadImg.style.display='none';
+  }
+}
+
+// ── UI ──
+function updateUI(){
+  ['food','water','happy','sleep','clean'].forEach(k=>{
+    const v=Math.round(Math.max(0,Math.min(100,state[k])));
+    document.getElementById('bar-'+k).style.width=v+'%';
+    document.getElementById('val-'+k).textContent=v+'%';
+    const si=document.getElementById('si-'+k);
+    if(si)si.classList.toggle('warn',v<28);
+  });
+  const ag=state.age||0;
+  let lbl='Yavru',pct=5;
+  if(ag>=30){lbl='Genç';pct=25;}if(ag>=90){lbl='Yetişkin';pct=55;}
+  if(ag>=365){lbl='Olgun';pct=80;}if(ag>=730){lbl='Yaşlı';pct=95;}
+  document.getElementById('bar-age').style.width=pct+'%';
+  document.getElementById('val-age').textContent=ag>0?ag+' gün':'Yeni doğdu';
+  document.getElementById('age-badge').textContent=lbl+' Kedi';
+  const sb=document.getElementById('btn-sleep');
+  sb.querySelector('span:last-child').textContent=state.sleeping?'Uyandır':'Uyut';
+  sb.disabled=!state.sleeping&&state.sleep>=100;
+  let msg='';
+  if(state.sleeping)msg='Zzz... tatlı rüyalar... 💤';
+  else if(state.food<=20)msg='Çok açım! Lütfen besle! 😿';
+  else if(state.water<=20)msg='Susadım çok! Su ver! 😿';
+  else if(state.clean<=20)msg='Çok kirli oldum! Yıka beni! 😿';
+  else if(state.food<30)msg='Biraz acıktım Merve! 🍖';
+  else if(state.water<30)msg='Su istiyorum! 💧';
+  else if(state.sleep<20)msg='Çok yoruldum... 💤';
+  else{const idle=["Merve'nin kedisi seni seviyor! 💜","Mırr mırr... 😸","Oynamak istiyorum! 🐾"];msg=idle[Math.floor(Date.now()/5000)%3];}
+  document.getElementById('status-text').textContent=msg;
+  updateCatVisual();
+}
+
+// ── Bubble ──
+function showBubble(txt){
+  if(bubTimer)clearTimeout(bubTimer);
+  const b=document.getElementById('speech');
+  b.textContent=txt;b.style.display='block';b.style.animation='none';
+  requestAnimationFrame(()=>{b.style.animation='bubble-in .3s cubic-bezier(.34,1.56,.64,1) forwards';});
+  bubTimer=setTimeout(()=>{b.style.display='none';},3800);
+}
+function spawnP(em,e){spawnParticlesAt(em,e?.clientX||window.innerWidth/2,e?.clientY||window.innerHeight/2);}
+function spawnParticlesAt(em,x,y){
+  for(let i=0;i<5;i++)setTimeout(()=>{
+    const p=document.createElement('div');p.className='particle';
+    p.textContent=em[Math.floor(Math.random()*em.length)];
+    p.style.left=(x+(Math.random()-.5)*60)+'px';p.style.top=(y+(Math.random()-.5)*40)+'px';
+    document.body.appendChild(p);setTimeout(()=>p.remove(),1100);
+  },i*80);
+}
+
+// ── Stars ──
+const sl2=document.getElementById('stars-layer');
+for(let i=0;i<30;i++){
+  const s=document.createElement('div');s.className='star';const sz=Math.random()*2+.4;
+  s.style.cssText='width:'+sz+'px;height:'+sz+'px;left:'+Math.random()*100+'%;top:'+Math.random()*65+'%;--d:'+(1.8+Math.random()*2.5)+'s;animation-delay:'+Math.random()*3+'s';
+  sl2.appendChild(s);
+}
+
+function sl(ms){return new Promise(r=>setTimeout(r,ms));}
+
+window.addEventListener('load',()=>{
+  // Init cat position as pixel value (not %)
+  const w=sceneEl.offsetWidth||360;
+  catWorld.style.transform='none';
+  catWorld.style.left=(w/2)+'px';
+  updateSky();
+});
+</script>
+</body>
+</html>
